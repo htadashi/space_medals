@@ -1,13 +1,9 @@
 import { ethers } from "ethers";
 const addresses = require("./adresses");
 
-async function getAlreadyAwarded(playerAddress, provider) {
+async function getAlreadyAwarded(playerAddress) {
   if (typeof window.ethereum !== "undefined") {
-    const account = await window.ethereum.request({
-      method: "eth_requestAccounts",
-    });
     const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const playerAddress = account[0];
     const AwardContract = new ethers.Contract(
       addresses.awardAddress,
       [
@@ -26,13 +22,9 @@ async function getAlreadyAwarded(playerAddress, provider) {
   }
 }
 
-async function getLevelsCompleted() {
+async function getLevelsCompleted(playerAddress) {
   if (typeof window.ethereum !== "undefined") {
-    const account = await window.ethereum.request({
-      method: "eth_requestAccounts",
-    });
     const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const playerAddress = account[0];
     const EthernautContract = new ethers.Contract(
       addresses.EthernautAddress,
       [
@@ -49,11 +41,8 @@ async function getLevelsCompleted() {
   }
 }
 
-async function mintAward() {
+async function mintAward(playerAddress) {
   if (typeof window.ethereum !== "undefined") {
-    const account = await window.ethereum.request({
-      method: "eth_requestAccounts",
-    });
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
     const contract = new ethers.Contract(
@@ -61,7 +50,7 @@ async function mintAward() {
       ["function safeMint(address to) public onlyOwner"],
       signer
     );
-    contract.safeMint(account[0]);
+    contract.safeMint(playerAddress);
   }
 }
 
