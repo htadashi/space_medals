@@ -1,24 +1,20 @@
 import { ethers } from "ethers";
 const addresses = require("./adresses");
+const config = require("./config");
 
-async function getAlreadyAwarded(playerAddress) {
+async function getAlreadyAwarded(playerAddress, badgeID) {
   if (typeof window.ethereum !== "undefined") {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const AwardContract = new ethers.Contract(
-      addresses.awardAddress,
+      addresses.awardContractAddress,
       [
-        "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)",
+        "function balanceOf(address account, uint256 id) public view returns (uint256)",
       ],
       provider
-    );
-    const filter = AwardContract.filters.Transfer(
-      addresses.awardAddress,
-      playerAddress,
-      null
-    );
-    const awards = await AwardContract.queryFilter(filter);
-    console.log(awards);
-    return (awards.length > 1) ? true : false;
+    );    
+    const awards = await AwardContract.balanceOf(playerAddress, badgeID);
+    console.log("getAlreadyAwarded")
+    return (awards.toNumber() > 0) ? true : false;
   }
 }
 
@@ -41,17 +37,25 @@ async function getLevelsCompleted(playerAddress) {
   }
 }
 
-async function mintAward(playerAddress) {
-  if (typeof window.ethereum !== "undefined") {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    const contract = new ethers.Contract(
-      addresses.awardAddress,
-      ["function safeMint(address to) public onlyOwner"],
-      signer
+async function mintAward(playerAddress, badgeID) {      
+    // Connect to Infura provider and to SpaceMedals wallet
+    const provider = new ethers.providers.InfuraProvider("rinkeby", {
+      projectId: config.projectId,
+      projectSecret: config.projectSecret,
+    });
+    
+    let wallet = new ethers.Wallet(
+      config.privateKey
     );
-    contract.safeMint(playerAddress);
-  }
+    wallet = await wallet.connect(provider); 
+
+    const contract = new ethers.Contract(
+      addresses.awardContractAddress,
+      ["function mint(address account, uint256 id, uint256 amount, bytes memory data)"],
+      wallet
+    );
+    contract.mint(playerAddress, badgeID, 1, 0x0000);
+  
 }
 
 export { getAlreadyAwarded, getLevelsCompleted, mintAward };

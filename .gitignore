@@ -12,6 +12,8 @@
 /build
 
 # misc
+TODO
+config.js
 .env
 .DS_Store
 .env.local
@@ -28,3 +30,13 @@ node_modules
 #Hardhat files
 cache
 artifacts
+
+# badges
+contracts/badges/badge1.png
+contracts/badges/badge1.svg
+contracts/badges/badge15.png
+contracts/badges/badge15.svg
+contracts/badges/badge23.png
+contracts/badges/badge23.svg
+
+.gitignore

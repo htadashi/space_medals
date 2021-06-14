@@ -7,16 +7,31 @@ const MinterComponent = (props) => {
 
   const [levelsCompleted, setLevelsCompleted] = useState();
   const [alreadyAwarded, setAlreadyAwarded] = useState();
+  const [selectedMetamaskAddress, setMetamaskAddress] = useState();  
 
   useEffect(() => {
 
     if (window.ethereum) {
+      setMetamaskAddress(window.ethereum.selectedAddress);
+      getLevelsCompleted(window.ethereum.selectedAddress)
+      .then(data => {
+        setLevelsCompleted(data);
+      });
+      getAlreadyAwarded(window.ethereum.selectedAddress, props.badgeId)
+      .then(response => {
+        if(response){ 
+          setAlreadyAwarded(true);
+        }else{
+          setAlreadyAwarded(false);
+        }
+      });   
       window.ethereum.on("accountsChanged", accounts => {
+        setMetamaskAddress(accounts[0]);
         getLevelsCompleted(accounts[0])
         .then(data => {
           setLevelsCompleted(data);
         });
-        getAlreadyAwarded(accounts[0])
+        getAlreadyAwarded(accounts[0], props.badgeId)
         .then(response => {
           if(response){ 
             setAlreadyAwarded(true);
@@ -27,7 +42,7 @@ const MinterComponent = (props) => {
       });
     }
 
-  }, []);
+  }, [props.badgeId]);
 
   return (            
         <>
@@ -47,8 +62,16 @@ const MinterComponent = (props) => {
       { 
         (() => {
         if(levelsCompleted >= props.nLevels){
-          if(alreadyAwarded){
-            return <Button onClick={mintAward}>🥇 Receive your award</Button>
+          if(!alreadyAwarded){
+            return <Button onClick={() => {              
+              mintAward(selectedMetamaskAddress, props.badgeId);               
+              getAlreadyAwarded(selectedMetamaskAddress, props.badgeId).then(response => {
+                if(response){ 
+                  setAlreadyAwarded(true);
+                }else{
+                  setAlreadyAwarded(false);
+              }});              
+            }}>🥇 Receive your award</Button>
           }else{
             return <Button disabled>🥇 Already awarded </Button>
           }          
