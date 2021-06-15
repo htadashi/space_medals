@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
 const addresses = require("./adresses");
-const config = require("./config");
+//const config = require("./config");
+require('dotenv').config();
 
 async function getAlreadyAwarded(playerAddress, badgeID) {
   if (typeof window.ethereum !== "undefined") {
@@ -40,12 +41,12 @@ async function getLevelsCompleted(playerAddress) {
 async function mintAward(playerAddress, badgeID) {      
     // Connect to Infura provider and to SpaceMedals wallet
     const provider = new ethers.providers.InfuraProvider("rinkeby", {
-      projectId: config.projectId,
-      projectSecret: config.projectSecret,
+      projectId: process.env.INFURA_ID,
+      projectSecret: process.env.INFURA_SECRET,
     });
     
     let wallet = new ethers.Wallet(
-      config.privateKey
+      process.env.PRIVATE_KEY
     );
     wallet = await wallet.connect(provider); 
 
